@@ -4,21 +4,23 @@
 """ 
 Made by pel for reboot task
 https://github.com/51reboot/homework-arch-4/blob/master/2/Reboot%E8%BF%90%E7%BB%B4%E5%BC%80%E5%8F%91%E6%9E%B6%E6%9E%84%E5%B8%88%E7%8F%AD-%E4%BD%9C%E4%B8%9A-2.pdf
-Auto_seekMM v0.2
-Des: 使用urllib2、正则表达式、ftp 修改为类的结构
+Name: Auto_seekMM v0.2
+Desc: 使用urllib2、正则表达式、ftp 修改为类的结构
+Auth: pel
+Date: 2015.04.30
+Useage:./spider.py begin_page end_page
 """
 import urllib
 import urllib2
-import os
 import shutil
-import time
+import time,sys,os
 import re
 import myftp
 
 # dbmm'spider
 class Spider:
   '''Spide's class for curl web'''
-  def __init__(self, page = 0, end_page = 1,  url =  "http://www.dbmeizi.com/?p="):
+  def __init__(self, page, end_page ,  url =  "http://www.dbmeizi.com/?p="):
     '''Set the configure'''
     self.page = page
     self.end_page = end_page
@@ -49,10 +51,11 @@ class Spider:
   def download_data(self, current_img_url, current_img_name):
     '''Enable get big data'''
     try:
-      img_head = urllib.urlopen(current_img_url)
+      # Timeout is 3s
+      img_head = urllib2.urlopen(current_img_url, None, 3)
       f = open(current_img_name, 'wb')
       while True:
-        data = img_head.read(1024*32)
+        data = img_head.read(1024*16)
         if len(data) == 0:
           break
         f.write(data)
@@ -74,7 +77,15 @@ class Spider:
     return self.dir_name
 
 if __name__ == "__main__":
-  dbmm_spider = Spider()
+  if len(sys.argv) < 3:
+    print "The first value is begin page, the 2st value is end page!"
+    print "The default begin = 0,the end = 1."
+    begin_page = 0
+    end_page = 1
+  else:
+    begin_page = int(sys.argv[1])
+    end_page = int(sys.argv[2])
+  dbmm_spider = Spider(begin_page, end_page)
   dir_name = dbmm_spider.start()
   ftp = myftp.Myftp()
   ftp.login_ftp()
